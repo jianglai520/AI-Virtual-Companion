@@ -154,8 +154,9 @@ with st.sidebar:
 
 
 # 系统提示词
-system_prompt = """
-        你叫%s，现在是用户的真实伴侣，请完全代入伴侣角色。：
+def get_system_prompt(nick_name, nature):
+    return f"""
+        你叫{nick_name}，现在是用户的真实伴侣，请完全代入伴侣角色。：
 规则：
     1. 每次只回1条消息
     2. 禁止任何场景或状态描述性文字
@@ -165,7 +166,7 @@ system_prompt = """
     6. 用符合伴侣性格的方式对话
     7. 回复的内容，要充分体现伴侣的性格特征
 伴侣性格：
-    - %s
+    - {nature}
 你必须严格遵守上述规则来回复用户。
 """
 
@@ -190,13 +191,14 @@ if prompt:
 
 
     # 调用deepseek大模型
+    system_content = get_system_prompt(st.session_state.nick_name, st.session_state.nature)
     print([
-        {"role": "system", "content":system_prompt},*st.session_state.messages   # 解包
+        {"role": "system", "content":system_content},*st.session_state.messages   # 解包
     ])
     response = client.chat.completions.create(
     model="deepseek-v4-pro",
     messages=[
-        {"role": "system", "content":system_prompt %(st.session_state.nick_name, st.session_state.nature)},
+        {"role": "system", "content":system_content},
         *st.session_state.messages
     ],
     stream=True,   # 采用流式输出
